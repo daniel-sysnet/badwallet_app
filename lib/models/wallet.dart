@@ -7,10 +7,14 @@ class Wallet {
   Wallet({required this.phone, required this.balance, this.currency = 'XOF'});
 
   factory Wallet.fromJson(Map<String, dynamic> json) {
+    final dynamic balanceValue =
+        json['balance'] ?? json['solde'] ?? json['amount'] ?? 0;
+    final dynamic currencyValue = json['currency'] ?? 'XOF';
+
     return Wallet(
       phone: json['phone'] ?? json['phoneNumber'] ?? '',
-      balance: (json['balance'] ?? 0).toDouble(),
-      currency: json['currency'] ?? 'XOF',
+      balance: balanceValue is num ? balanceValue.toDouble() : 0.0,
+      currency: currencyValue is String ? currencyValue : 'XOF',
     );
   }
 }

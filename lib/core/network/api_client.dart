@@ -17,9 +17,9 @@ class ApiClient {
   Uri _uri(String path) => Uri.parse('${ApiConstants.baseUrl}$path');
 
   Map<String, String> get _headers => {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      };
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  };
 
   Future<dynamic> get(String path) async {
     try {
@@ -28,7 +28,9 @@ class ApiClient {
           .timeout(ApiConstants.timeout);
       return _handle(res);
     } catch (e) {
-      throw ApiException('Erreur réseau : impossible de joindre le serveur');
+      throw ApiException(
+        'Erreur réseau : impossible de joindre le serveur. Vérifiez que le backend tourne sur ${ApiConstants.baseUrl}.',
+      );
     }
   }
 
@@ -39,7 +41,9 @@ class ApiClient {
           .timeout(ApiConstants.timeout);
       return _handle(res);
     } catch (e) {
-      throw ApiException('Erreur réseau : impossible de joindre le serveur');
+      throw ApiException(
+        'Erreur réseau : impossible de joindre le serveur. Vérifiez que le backend tourne sur ${ApiConstants.baseUrl}.',
+      );
     }
   }
 
