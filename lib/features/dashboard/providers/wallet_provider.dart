@@ -23,7 +23,7 @@ class WalletProvider extends ChangeNotifier {
     notifyListeners();
     try {
       final json = await _api.get(ApiConstants.balance(phone));
-      final wallet = Wallet.fromJson(json is Map<String, dynamic> ? json : {});
+      final wallet = Wallet.fromJson(json);
       _state = ViewState.loaded(wallet);
     } on ApiException catch (e) {
       _state = ViewState.error(e.message);
