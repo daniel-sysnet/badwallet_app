@@ -32,4 +32,8 @@ class WalletProvider extends ChangeNotifier {
     }
     notifyListeners();
   }
+
+  Future<void> refreshForPhone(String phone) async {
+    await fetchBalance(phone);
+  }
 }

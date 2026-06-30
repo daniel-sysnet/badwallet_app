@@ -3,6 +3,8 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../dashboard/providers/wallet_provider.dart';
+import '../../history/providers/transaction_provider.dart';
 import '../providers/transfer_provider.dart';
 
 class TransferScreen extends StatefulWidget {
@@ -97,6 +99,8 @@ class _TransferScreenState extends State<TransferScreen> {
 
     final amount =
         double.tryParse(_amountController.text.replaceAll(' ', '')) ?? 0;
+    final walletProvider = context.read<WalletProvider>();
+    final transactionProvider = context.read<TransactionProvider>();
     final success = await context.read<TransferProvider>().sendTransfer(
       phone: phone,
       recipient: _recipientController.text.trim(),
@@ -106,6 +110,11 @@ class _TransferScreenState extends State<TransferScreen> {
     if (!mounted) return;
 
     if (success) {
+      if (phone.isNotEmpty) {
+        await walletProvider.fetchBalance(phone);
+        await transactionProvider.fetchTransactions(phone);
+      }
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Transfert envoyé avec succès')),
       );

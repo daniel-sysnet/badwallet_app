@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../dashboard/providers/wallet_provider.dart';
+import '../../history/providers/transaction_provider.dart';
 import '../providers/bills_provider.dart';
 
 class BillsScreen extends StatefulWidget {
@@ -92,6 +94,8 @@ class _BillsListState extends State<_BillsList> {
     }
 
     final provider = context.read<BillsProvider>();
+    final walletProvider = context.read<WalletProvider>();
+    final transactionProvider = context.read<TransactionProvider>();
     final selected = provider.factures
         .where((facture) => _selectedIds.contains(facture.id))
         .toList();
@@ -124,6 +128,11 @@ class _BillsListState extends State<_BillsList> {
 
     if (!mounted) return;
     if (success) {
+      if (phone.isNotEmpty) {
+        await walletProvider.fetchBalance(phone);
+        await transactionProvider.fetchTransactions(phone);
+      }
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Paiement effectué')));
