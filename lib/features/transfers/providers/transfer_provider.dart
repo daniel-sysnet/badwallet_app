@@ -19,8 +19,8 @@ class TransferProvider extends ChangeNotifier {
 
     try {
       final response = await _api.post(ApiConstants.transfer, {
-        'phone': phone,
-        'recipient': recipient,
+        'senderPhone': phone,
+        'receiverPhone': recipient,
         'amount': amount,
       });
 

@@ -21,7 +21,11 @@ class BillsProvider extends ChangeNotifier {
       final json = await _api.get(
         ApiConstants.facturesByFournisseur(fournisseur),
       );
-      final list = (json is List ? json : <dynamic>[])
+      final payload = json is Map<String, dynamic> ? json : <String, dynamic>{};
+      final rawFactures = payload['factures'] is List
+          ? payload['factures'] as List<dynamic>
+          : <dynamic>[];
+      final list = rawFactures
           .map((e) => Facture.fromJson(e as Map<String, dynamic>, fournisseur))
           .toList();
       _factures = list;
@@ -46,8 +50,14 @@ class BillsProvider extends ChangeNotifier {
 
     try {
       await _api.post(ApiConstants.payFactures, {
-        'phone': phone,
-        'factureIds': selected.map((facture) => facture.id).toList(),
+        'phoneNumber': phone,
+        'serviceName': selected.first.fournisseur,
+        'factureReferences': selected
+            .map(
+              (facture) =>
+                  facture.reference.isNotEmpty ? facture.reference : facture.id,
+            )
+            .toList(),
       });
       _state = ViewState.loaded([..._factures]);
       return true;
