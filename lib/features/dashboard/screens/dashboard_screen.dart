@@ -10,6 +10,7 @@ import '../../history/widgets/transaction_tile.dart';
 import '../../transfers/screens/transfer_screen.dart';
 import '../../bills/screens/bills_screen.dart';
 import '../../history/screens/history_screen.dart';
+import '../../auth/screens/phone_entry_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -32,9 +33,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
     context.read<TransactionProvider>().fetchTransactions(phone);
   }
 
+  Future<void> _logout() async {
+    await context.read<AuthProvider>().logout();
+    if (!mounted) return;
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const PhoneEntryScreen()),
+      (route) => false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('BadWallet'),
+        actions: [
+          IconButton(
+            tooltip: 'Se déconnecter',
+            onPressed: _logout,
+            icon: const Icon(Icons.logout_rounded),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () async => _loadData(),
