@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/api_error_card.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/wallet_provider.dart';
 import '../../history/providers/transaction_provider.dart';
@@ -42,7 +43,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
             children: [
               Text('Bonjour 👋', style: Theme.of(context).textTheme.bodyMedium),
               const SizedBox(height: 4),
-              Text('Mon Portefeuille', style: Theme.of(context).textTheme.headlineMedium),
+              Text(
+                'Mon Portefeuille',
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
               const SizedBox(height: 24),
               _BalanceCard(),
               const SizedBox(height: 24),
@@ -51,7 +55,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Transactions récentes', style: Theme.of(context).textTheme.titleLarge),
+                  Text(
+                    'Transactions récentes',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
                   TextButton(
                     onPressed: () => Navigator.of(context).push(
                       MaterialPageRoute(builder: (_) => const HistoryScreen()),
@@ -86,44 +93,56 @@ class _BalanceCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Solde disponible', style: TextStyle(color: Colors.white70)),
+                const Text(
+                  'Solde disponible',
+                  style: TextStyle(color: Colors.white70),
+                ),
                 IconButton(
                   onPressed: wallet.toggleBalanceVisibility,
                   icon: Icon(
-                    wallet.balanceVisible ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                    wallet.balanceVisible
+                        ? Icons.visibility_outlined
+                        : Icons.visibility_off_outlined,
                     color: Colors.white70,
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 4),
-            Builder(builder: (context) {
-              if (wallet.state.isLoading) {
-                return const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 12),
-                  child: SizedBox(
-                    height: 24,
-                    width: 24,
-                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+            Builder(
+              builder: (context) {
+                if (wallet.state.isLoading) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    child: SizedBox(
+                      height: 24,
+                      width: 24,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    ),
+                  );
+                }
+                if (wallet.state.isError) {
+                  return Text(
+                    wallet.state.errorMessage ?? 'Erreur de chargement',
+                    style: const TextStyle(color: Colors.white70, fontSize: 13),
+                  );
+                }
+                final balance = wallet.state.data?.balance ?? 0;
+                return Text(
+                  wallet.balanceVisible
+                      ? '${currencyFmt.format(balance)} XOF'
+                      : '••••••',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 32,
+                    fontWeight: FontWeight.w700,
                   ),
                 );
-              }
-              if (wallet.state.isError) {
-                return Text(
-                  wallet.state.errorMessage ?? 'Erreur de chargement',
-                  style: const TextStyle(color: Colors.white70, fontSize: 13),
-                );
-              }
-              final balance = wallet.state.data?.balance ?? 0;
-              return Text(
-                wallet.balanceVisible ? '${currencyFmt.format(balance)} XOF' : '••••••',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 32,
-                  fontWeight: FontWeight.w700,
-                ),
-              );
-            }),
+              },
+            ),
           ],
         ),
       ),
@@ -139,25 +158,25 @@ class _QuickActions extends StatelessWidget {
         _ActionButton(
           icon: Icons.send_rounded,
           label: 'Transférer',
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const TransferScreen()),
-          ),
+          onTap: () => Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (_) => const TransferScreen())),
         ),
         const SizedBox(width: 12),
         _ActionButton(
           icon: Icons.receipt_long_rounded,
           label: 'Payer',
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const BillsScreen()),
-          ),
+          onTap: () => Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (_) => const BillsScreen())),
         ),
         const SizedBox(width: 12),
         _ActionButton(
           icon: Icons.history_rounded,
           label: 'Historique',
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const HistoryScreen()),
-          ),
+          onTap: () => Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (_) => const HistoryScreen())),
         ),
       ],
     );
@@ -168,7 +187,11 @@ class _ActionButton extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
-  const _ActionButton({required this.icon, required this.label, required this.onTap});
+  const _ActionButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -210,11 +233,13 @@ class _RecentTransactions extends StatelessWidget {
     if (txProvider.state.isError) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 24),
-        child: Center(
-          child: Text(
-            txProvider.state.errorMessage ?? 'Erreur de chargement',
-            style: const TextStyle(color: AppColors.textSecondary),
-          ),
+        child: ApiErrorCard(
+          message: txProvider.state.errorMessage ?? 'Erreur de chargement',
+          onRetry: () => context.read<AuthProvider>().phone != null
+              ? context.read<TransactionProvider>().fetchTransactions(
+                  context.read<AuthProvider>().phone!,
+                )
+              : null,
         ),
       );
     }

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
-import '../../dashboard/screens/dashboard_screen.dart';
+import '../../secure/screens/pin_screen.dart';
+
 class PhoneEntryScreen extends StatefulWidget {
   const PhoneEntryScreen({super.key});
 
@@ -20,15 +21,15 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen> {
   }
 
   void _submit() async {
-  if (!_formKey.currentState!.validate()) return;
-  final auth = context.read<AuthProvider>();
-  await auth.setPhone(_controller.text.trim());
-  if (!mounted) return;
-  Navigator.of(context).pushReplacement(
-    MaterialPageRoute(builder: (_) => const DashboardScreen()),
-  );
+    if (!_formKey.currentState!.validate()) return;
+    final auth = context.read<AuthProvider>();
+    await auth.setPhone(_controller.text.trim());
+    if (!mounted) return;
+    Navigator.of(
+      context,
+    ).pushReplacement(MaterialPageRoute(builder: (_) => const PinScreen()));
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,7 +42,10 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Bienvenue', style: Theme.of(context).textTheme.headlineMedium),
+                Text(
+                  'Bienvenue',
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
                 const SizedBox(height: 8),
                 Text(
                   'Entrez votre numéro de téléphone pour continuer',

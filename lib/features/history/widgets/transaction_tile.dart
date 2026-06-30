@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../models/transaction.dart';
+import '../screens/transaction_detail_screen.dart';
 
 class TransactionTile extends StatelessWidget {
   final AppTransaction transaction;
@@ -29,6 +30,11 @@ class TransactionTile extends StatelessWidget {
     final currencyFmt = NumberFormat.decimalPattern('fr_FR');
 
     return ListTile(
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => TransactionDetailScreen(transaction: transaction),
+        ),
+      ),
       contentPadding: EdgeInsets.zero,
       leading: CircleAvatar(
         backgroundColor: color.withValues(alpha: 0.12),
@@ -39,7 +45,8 @@ class TransactionTile extends StatelessWidget {
       ),
       title: Text(transaction.label ?? _typeLabel(transaction.type)),
       subtitle: Text(
-        transaction.counterparty ?? DateFormat('dd/MM/yyyy HH:mm').format(transaction.date),
+        transaction.counterparty ??
+            DateFormat('dd/MM/yyyy HH:mm').format(transaction.date),
       ),
       trailing: Text(
         '${isOut ? '-' : '+'}${currencyFmt.format(transaction.amount)} XOF',

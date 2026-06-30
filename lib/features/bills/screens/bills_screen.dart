@@ -24,7 +24,10 @@ class _BillsScreenState extends State<BillsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Choisissez un fournisseur', style: Theme.of(context).textTheme.titleLarge),
+              Text(
+                'Choisissez un fournisseur',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
               const SizedBox(height: 12),
               Wrap(
                 spacing: 8,
@@ -44,7 +47,9 @@ class _BillsScreenState extends State<BillsScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () => context.read<BillsProvider>().fetchFactures(_selectedProvider),
+                  onPressed: () => context.read<BillsProvider>().fetchFactures(
+                    _selectedProvider,
+                  ),
                   child: const Text('Charger les factures'),
                 ),
               ),
@@ -71,25 +76,56 @@ class _BillsListState extends State<_BillsList> {
     final phone = auth.phone;
     if (phone == null || phone.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Veuillez renseigner votre numéro de téléphone')),
+        const SnackBar(
+          content: Text('Veuillez renseigner votre numéro de téléphone'),
+        ),
       );
       return;
     }
 
     final provider = context.read<BillsProvider>();
-    final selected = provider.factures.where((facture) => _selectedIds.contains(facture.id)).toList();
-    final success = await provider.payFactures(phone: phone, selected: selected);
+    final selected = provider.factures
+        .where((facture) => _selectedIds.contains(facture.id))
+        .toList();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirmer le paiement'),
+        content: Text(
+          'Payer ${selected.length} facture(s) pour un montant total de ${selected.fold<double>(0, (sum, item) => sum + item.montant).toStringAsFixed(0)} XOF ?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Annuler'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Confirmer'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    final success = await provider.payFactures(
+      phone: phone,
+      selected: selected,
+    );
 
     if (!mounted) return;
     if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Paiement effectué')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Paiement effectué')));
       _selectedIds.clear();
       setState(() {});
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(provider.state.errorMessage ?? 'Le paiement a échoué')),
+        SnackBar(
+          content: Text(provider.state.errorMessage ?? 'Le paiement a échoué'),
+        ),
       );
     }
   }
@@ -104,12 +140,23 @@ class _BillsListState extends State<_BillsList> {
 
     if (provider.state.isError) {
       return Center(
-        child: Text(provider.state.errorMessage ?? 'Erreur de chargement'),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Text(
+            provider.state.errorMessage ?? 'Erreur de chargement',
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Colors.grey),
+          ),
+        ),
       );
     }
 
     if (provider.factures.isEmpty) {
-      return const Center(child: Text('Aucune facture à afficher pour le moment'));
+      return const Center(
+        child: Text(
+          'Aucune facture à afficher pour le moment. Sélectionnez un fournisseur et rechargez les données.',
+        ),
+      );
     }
 
     return Column(
@@ -124,7 +171,9 @@ class _BillsListState extends State<_BillsList> {
                 child: CheckboxListTile(
                   value: selected,
                   title: Text('${facture.fournisseur} - ${facture.reference}'),
-                  subtitle: Text('${facture.montant.toStringAsFixed(0)} XOF • Échéance ${facture.echeance.day}/${facture.echeance.month}'),
+                  subtitle: Text(
+                    '${facture.montant.toStringAsFixed(0)} XOF • Échéance ${facture.echeance.day}/${facture.echeance.month}',
+                  ),
                   onChanged: (_) {
                     setState(() {
                       if (selected) {
