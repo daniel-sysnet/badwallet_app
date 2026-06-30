@@ -1,9 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../providers/auth_provider.dart';
 import 'phone_entry_screen.dart';
-// import '../../dashboard/screens/dashboard_screen.dart'; // décommenter quand créé
+import '../../dashboard/screens/dashboard_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -13,31 +15,37 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  Timer? _navigationTimer;
+  bool _disposed = false;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) => _checkAuth());
   }
 
-  Future<void> _checkAuth() async {
-    final auth = context.read<AuthProvider>();
-    // attend que le secure storage ait fini de lire
-    while (auth.isLoading) {
-      await Future.delayed(const Duration(milliseconds: 50));
-    }
-    await Future.delayed(const Duration(milliseconds: 800)); // effet splash
+  @override
+  void dispose() {
+    _disposed = true;
+    _navigationTimer?.cancel();
+    super.dispose();
+  }
 
-    if (!mounted) return;
-    if (auth.isLoggedIn) {
-      // TODO: rediriger vers DashboardScreen une fois créé
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const PhoneEntryScreen()),
-      );
-    } else {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const PhoneEntryScreen()),
-      );
-    }
+  void _checkAuth() {
+    _navigationTimer = Timer(const Duration(milliseconds: 800), () {
+      if (!mounted || _disposed) return;
+
+      final auth = context.read<AuthProvider>();
+      if (auth.isLoggedIn) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const DashboardScreen()),
+        );
+      } else {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const PhoneEntryScreen()),
+        );
+      }
+    });
   }
 
   @override

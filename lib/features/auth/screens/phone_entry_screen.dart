@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
-// import '../../dashboard/screens/dashboard_screen.dart'; // décommenter quand créé
-
+import '../../dashboard/screens/dashboard_screen.dart';
 class PhoneEntryScreen extends StatefulWidget {
   const PhoneEntryScreen({super.key});
 
@@ -21,13 +20,15 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen> {
   }
 
   void _submit() async {
-    if (!_formKey.currentState!.validate()) return;
-    final auth = context.read<AuthProvider>();
-    await auth.setPhone(_controller.text.trim());
-    if (!mounted) return;
-    // TODO: Navigator.pushReplacement vers DashboardScreen une fois créé
+  if (!_formKey.currentState!.validate()) return;
+  final auth = context.read<AuthProvider>();
+  await auth.setPhone(_controller.text.trim());
+  if (!mounted) return;
+  Navigator.of(context).pushReplacement(
+    MaterialPageRoute(builder: (_) => const DashboardScreen()),
+  );
   }
-
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
