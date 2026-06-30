@@ -13,14 +13,25 @@ class BillsProvider extends ChangeNotifier {
   List<Facture> _factures = [];
   List<Facture> get factures => _factures;
 
-  Future<void> fetchFactures(String fournisseur) async {
+  Future<void> fetchFactures(String fournisseur, {String? phone}) async {
     _state = const ViewState.loading();
     notifyListeners();
 
     try {
-      final json = await _api.get(
-        ApiConstants.facturesByFournisseur(fournisseur),
-      );
+      String walletCode = '';
+      if (phone != null && phone.isNotEmpty) {
+        final walletJson = await _api.get(ApiConstants.wallet(phone));
+        final walletMap = walletJson is Map<String, dynamic>
+            ? walletJson
+            : <String, dynamic>{};
+        walletCode = walletMap['code']?.toString() ?? '';
+      }
+
+      final endpoint = walletCode.isNotEmpty
+          ? ApiConstants.facturesByWalletCode(walletCode, unite: fournisseur)
+          : ApiConstants.facturesByFournisseur(fournisseur);
+
+      final json = await _api.get(endpoint);
       final payload = json is Map<String, dynamic> ? json : <String, dynamic>{};
       final rawFactures = payload['factures'] is List
           ? payload['factures'] as List<dynamic>

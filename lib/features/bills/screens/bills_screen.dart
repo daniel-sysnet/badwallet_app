@@ -38,7 +38,11 @@ class _BillsScreenState extends State<BillsScreen> {
                     selected: selected,
                     onSelected: (_) {
                       setState(() => _selectedProvider = provider);
-                      context.read<BillsProvider>().fetchFactures(provider);
+                      final phone = context.read<AuthProvider>().phone;
+                      context.read<BillsProvider>().fetchFactures(
+                        provider,
+                        phone: phone,
+                      );
                     },
                   );
                 }).toList(),
@@ -47,9 +51,13 @@ class _BillsScreenState extends State<BillsScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () => context.read<BillsProvider>().fetchFactures(
-                    _selectedProvider,
-                  ),
+                  onPressed: () {
+                    final phone = context.read<AuthProvider>().phone;
+                    context.read<BillsProvider>().fetchFactures(
+                      _selectedProvider,
+                      phone: phone,
+                    );
+                  },
                   child: const Text('Charger les factures'),
                 ),
               ),
