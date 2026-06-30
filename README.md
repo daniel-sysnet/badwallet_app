@@ -1,17 +1,36 @@
-# badwallet_app
+# BadWallet App
 
-A new Flutter project.
+Application mobile Flutter compatible Android pour la gestion de portefeuille, conforme au sujet de projet.
 
-## Getting Started
+## Fonctionnalités implémentées
+- Écran de splash avec onboarding simulé
+- Saisie du numéro de téléphone
+- Tableau de bord avec solde et visibilité du solde
+- Transfert d’argent
+- Paiement de factures
+- Historique des transactions
+- Consommation des endpoints API via HTTP
 
-This project is a starting point for a Flutter application.
+## Stack technique
+- Flutter
+- Dart
+- Provider
+- HTTP
+- Flutter Secure Storage
+- Intl
 
-A few resources to get you started if this is your first Flutter project:
+## Lancer l’application
+```bash
+flutter pub get
+flutter run
+```
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+## Générer l’APK de release
+```bash
+flutter build apk --release
+```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Le fichier sera généré dans :
+```bash
+build/app/outputs/flutter-apk/app-release.apk
+```
